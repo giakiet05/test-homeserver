@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homeserver Microservices Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --primary: #38bdf8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem; }
+    .container { max-width: 900px; width: 100%; }
+    .header { text-align: center; margin-bottom: 2.5rem; }
+    .badge { display: inline-block; background: rgba(56, 189, 248, 0.15); color: var(--primary); padding: 0.35rem 0.85rem; border-radius: 9999px; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.75rem; border: 1px solid rgba(56, 189, 248, 0.3); }
+    h1 { font-size: 2.25rem; font-weight: 800; letter-spacing: -0.025em; margin-bottom: 0.5rem; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    p.subtitle { color: var(--text-muted); font-size: 1rem; }
+
+    .chain-container { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; position: relative; }
+    @media (max-width: 768px) { .chain-container { flex-direction: column; } }
+    
+    .node-card { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 1rem; padding: 1.25rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .node-card.active { border-color: var(--primary); }
+    .node-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--card-border); }
+    .node-card.fe::before { background: #38bdf8; }
+    .node-card.be1::before { background: #818cf8; }
+    .node-card.be2::before { background: #c084fc; }
+
+    .node-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; box-shadow: 0 0 8px var(--success); }
+    .node-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.75rem; }
+    .node-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; background: rgba(0, 0, 0, 0.3); padding: 0.4rem 0.6rem; border-radius: 0.35rem; color: #cbd5e1; }
+
+    .arrow { font-size: 1.5rem; color: var(--text-muted); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.15); } }
+
+    .controls { display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
+    .btn { background: #2563eb; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39); }
+    .btn:hover { background: #1d4ed8; transform: translateY(-1px); }
+    .btn:active { transform: translateY(1px); }
+
+    .json-card { background: #0b0f19; border: 1px solid var(--card-border); border-radius: 1rem; padding: 1.25rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; overflow-x: auto; color: #a5f3fc; }
+    .json-header { display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); font-size: 0.75rem; margin-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="badge">CI/CD Demo & Microservice Mesh</span>
+      <h1>Homeserver Microservices Chain</h1>
+      <p class="subtitle">Visualizing live end-to-end communication: <code>Frontend ➔ Backend 1 ➔ Backend 2</code></p>
+    </div>
+
+    <div class="chain-container">
+      <div class="node-card fe">
+        <div class="node-title">
+          <span>🎨 Frontend (FE)</span>
+          <span class="status-dot"></span>
+        </div>
+        <div class="node-desc">Client Web Application served by Nginx. Triggers aggregation calls.</div>
+        <div class="node-meta">Port: 80 | Static Assets</div>
+      </div>
+
+      <div class="arrow">➔</div>
+
+      <div class="node-card be1">
+        <div class="node-title">
+          <span>🚀 Gateway (BE1)</span>
+          <span class="status-dot"></span>
+        </div>
+        <div class="node-desc">Express API Gateway. Enriches client requests & dispatches to BE2.</div>
+        <div class="node-meta" id="be1-meta">Status: Ready</div>
+      </div>
+
+      <div class="arrow">➔</div>
+
+      <div class="node-card be2">
+        <div class="node-title">
+          <span>⚙️ Core Service (BE2)</span>
+          <span class="status-dot"></span>
+        </div>
+        <div class="node-desc">Deep internal core microservice with business logic calculations.</div>
+        <div class="node-meta" id="be2-meta">Status: Ready</div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn" onclick="fetchStatus()">⚡ Test Chain Call Now</button>
+    </div>
+
+    <div class="json-card">
+      <div class="json-header">
+        <span>LIVE JSON RESPONSE PAYLOAD (FE ➔ BE1 ➔ BE2)</span>
+        <span id="latency-tag">Latency: --</span>
+      </div>
+      <pre id="json-output">Click "Test Chain Call Now" or waiting for live poll...</pre>
+    </div>
+  </div>
+
+  <script>
+    async function fetchStatus() {
+      const output = document.getElementById('json-output');
+      const latencyTag = document.getElementById('latency-tag');
+      const be1Meta = document.getElementById('be1-meta');
+      const be2Meta = document.getElementById('be2-meta');
+      
+      const start = Date.now();
+      try {
+        const res = await fetch('/api/status');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const duration = Date.now() - start;
+        
+        latencyTag.innerText = `Total Roundtrip: ${duration}ms`;
+        be1Meta.innerText = `Host: ${data.host} | Latency: ${data.totalLatency}`;
+        if (data.be2Connection && data.be2Connection.response) {
+          be2Meta.innerText = `Host: ${data.be2Connection.response.host} | Metric: ${data.be2Connection.response.data.randomMetric}`;
+        }
+        output.innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        latencyTag.innerText = 'Error';
+        output.innerText = 'Failed to fetch status: ' + err.message;
+      }
+    }
+
+    // Initial fetch on load & auto poll every 5s
+    fetchStatus();
+    setInterval(fetchStatus, 5000);
+  </script>
+</body>
+</html>
