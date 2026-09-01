@@ -1,37 +1,46 @@
 services:
   be2:
-    build:
-      context: ./be2
-      dockerfile: Dockerfile
     image: ghcr.io/giakiet05/test-homeserver-be2:latest
     container_name: test-be2
     restart: unless-stopped
     environment:
       - PORT=4002
       - NODE_ENV=production
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4002/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   be1:
-    build:
-      context: ./be1
-      dockerfile: Dockerfile
     image: ghcr.io/giakiet05/test-homeserver-be1:latest
     container_name: test-be1
     restart: unless-stopped
     depends_on:
-      - be2
+      be2:
+        condition: service_healthy
     environment:
       - PORT=4001
       - BE2_URL=http://be2:4002
       - NODE_ENV=production
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   fe:
-    build:
-      context: ./fe
-      dockerfile: Dockerfile
     image: ghcr.io/giakiet05/test-homeserver-fe:latest
     container_name: test-fe
     restart: unless-stopped
     depends_on:
-      - be1
-    ports:
-      - "8085:80"
+      be1:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:80 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

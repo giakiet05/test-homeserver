@@ -5,8 +5,8 @@ on:
     branches: [ "main", "master" ]
 
 jobs:
-  build-and-push:
-    name: Build Multi-Service Docker Images
+  build-and-deploy:
+    name: Build, Deploy & Verify Live Health
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -60,8 +60,32 @@ jobs:
       - name: Trigger Deployment on Coolify
         run: |
           echo "🚀 Triggering Coolify Deploy Webhook..."
-          curl -k -L -X POST "${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}" \
+          RESPONSE=$(curl -k -s -X POST "${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}" \
                -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
-               -H "Content-Type: application/json" \
-               --fail-with-body
-          echo "✅ Deployment triggered successfully!"
+               -H "Content-Type: application/json")
+          echo "Coolify Response: $RESPONSE"
+
+      # 5. Polling & Verifying Live Health Status
+      - name: Polling & Verifying Live Deployment
+        run: |
+          echo "⏳ Waiting for Homeserver to pull images & launch healthy containers..."
+          sleep 5
+          MAX_RETRIES=15
+          RETRY_COUNT=0
+          TARGET_URL="https://test.giakiet.io.vn/api/status"
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            HTTP_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" "$TARGET_URL" || echo "000")
+            if [ "$HTTP_STATUS" -eq 200 ]; then
+              echo "✅ Live endpoint responded with HTTP 200 OK!"
+              echo "Payload:"
+              curl -k -s "$TARGET_URL"
+              exit 0
+            fi
+            echo "Attempt $((RETRY_COUNT+1))/$MAX_RETRIES: Status $HTTP_STATUS. Waiting 5s for containers to settle..."
+            sleep 5
+            RETRY_COUNT=$((RETRY_COUNT+1))
+          done
+
+          echo "❌ Live health check failed after $MAX_RETRIES attempts."
+          exit 1
