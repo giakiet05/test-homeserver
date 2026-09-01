@@ -59,10 +59,9 @@ jobs:
       # 4. Trigger Coolify Deploy Webhook
       - name: Trigger Deployment on Coolify
         run: |
-          if [ -n "${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}" ]; then
-            echo "🚀 Triggering Coolify Deploy Webhook..."
-            curl -k -L -s -X GET "${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}" || curl -k -L -s -X POST "${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}"
-            echo "✅ Deployment triggered successfully!"
-          else
-            echo "⚠️ COOLIFY_DEPLOY_WEBHOOK secret is not set. Skipping webhook trigger."
-          fi
+          echo "🚀 Triggering Coolify Deploy Webhook..."
+          curl -k -L -X POST "${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}" \
+               -H "Authorization: Bearer ${{ secrets.COOLIFY_API_TOKEN }}" \
+               -H "Content-Type: application/json" \
+               --fail-with-body
+          echo "✅ Deployment triggered successfully!"
