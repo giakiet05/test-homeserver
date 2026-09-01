@@ -3,25 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Homeserver Microservices Demo v2.0</title>
+  <title>Homeserver Microservices Demo v3.0</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #090d16;
-      --card-bg: #131b2e;
-      --card-border: #1e293b;
-      --primary: #10b981;
-      --accent: #8b5cf6;
+      --bg: #090a0f;
+      --card-bg: #111422;
+      --card-border: #1e2438;
+      --primary: #f59e0b;
+      --accent: #ec4899;
       --success: #10b981;
-      --warning: #f59e0b;
-      --error: #ef4444;
       --text: #f8fafc;
       --text-muted: #94a3b8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
     body { 
-      background: radial-gradient(circle at top, #1e1b4b 0%, #090d16 60%); 
+      background: radial-gradient(circle at top, #311b0b 0%, #090a0f 65%); 
       color: var(--text); 
       min-height: 100vh; 
       display: flex; 
@@ -35,25 +33,25 @@
       display: inline-flex; 
       align-items: center; 
       gap: 0.5rem; 
-      background: rgba(16, 185, 129, 0.15); 
-      color: #34d399; 
-      padding: 0.4rem 1rem; 
+      background: rgba(245, 158, 11, 0.15); 
+      color: #fbbf24; 
+      padding: 0.45rem 1.25rem; 
       border-radius: 9999px; 
-      font-size: 0.9rem; 
-      font-weight: 700; 
+      font-size: 0.95rem; 
+      font-weight: 800; 
       margin-bottom: 0.85rem; 
-      border: 1px solid rgba(16, 185, 129, 0.4); 
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); 
+      border: 1px solid rgba(245, 158, 11, 0.5); 
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); 
     }
-    .badge-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; animation: blink 1.5s infinite; }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .badge-dot { width: 10px; height: 10px; border-radius: 50%; background: #f59e0b; box-shadow: 0 0 10px #f59e0b; animation: blink 1.2s infinite; }
+    @keyframes blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.85); } }
     
     h1 { 
-      font-size: 2.5rem; 
+      font-size: 2.6rem; 
       font-weight: 800; 
       letter-spacing: -0.03em; 
       margin-bottom: 0.5rem; 
-      background: linear-gradient(to right, #10b981, #06b6d4, #a855f7); 
+      background: linear-gradient(to right, #f59e0b, #ec4899, #8b5cf6); 
       -webkit-background-clip: text; 
       -webkit-text-fill-color: transparent; 
     }
@@ -73,49 +71,49 @@
       position: relative; 
       overflow: hidden; 
     }
-    .node-card:hover { transform: translateY(-3px); border-color: rgba(16, 185, 129, 0.4); }
+    .node-card:hover { transform: translateY(-3px); border-color: rgba(245, 158, 11, 0.4); }
     .node-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
-    .node-card.fe::before { background: linear-gradient(to right, #10b981, #06b6d4); }
-    .node-card.be1::before { background: linear-gradient(to right, #06b6d4, #8b5cf6); }
-    .node-card.be2::before { background: linear-gradient(to right, #8b5cf6, #ec4899); }
+    .node-card.fe::before { background: linear-gradient(to right, #f59e0b, #ec4899); }
+    .node-card.be1::before { background: linear-gradient(to right, #ec4899, #8b5cf6); }
+    .node-card.be2::before { background: linear-gradient(to right, #8b5cf6, #3b82f6); }
 
     .node-title { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
     .status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--success); display: inline-block; box-shadow: 0 0 10px var(--success); }
     .node-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.85rem; }
-    .node-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; background: rgba(0, 0, 0, 0.4); padding: 0.45rem 0.65rem; border-radius: 0.4rem; color: #a5f3fc; border: 1px solid rgba(255,255,255,0.05); }
+    .node-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; background: rgba(0, 0, 0, 0.4); padding: 0.45rem 0.65rem; border-radius: 0.4rem; color: #fde68a; border: 1px solid rgba(255,255,255,0.05); }
 
-    .arrow { font-size: 1.5rem; color: #06b6d4; animation: pulse 2s infinite; text-shadow: 0 0 10px rgba(6, 182, 212, 0.5); }
+    .arrow { font-size: 1.5rem; color: #f59e0b; animation: pulse 2s infinite; text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
     @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
 
     .controls { display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
     .btn { 
-      background: linear-gradient(135deg, #10b981, #059669); 
-      color: white; 
+      background: linear-gradient(135deg, #f59e0b, #d97706); 
+      color: #111; 
       border: none; 
       padding: 0.85rem 1.75rem; 
       border-radius: 0.6rem; 
-      font-weight: 700; 
+      font-weight: 800; 
       font-size: 1rem; 
       cursor: pointer; 
       transition: all 0.2s; 
-      box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.4); 
+      box-shadow: 0 6px 20px 0 rgba(245, 158, 11, 0.4); 
     }
-    .btn:hover { background: linear-gradient(135deg, #059669, #047857); transform: translateY(-2px); box-shadow: 0 8px 25px 0 rgba(16, 185, 129, 0.6); }
+    .btn:hover { background: linear-gradient(135deg, #fbbf24, #f59e0b); transform: translateY(-2px); box-shadow: 0 8px 25px 0 rgba(245, 158, 11, 0.6); }
     .btn:active { transform: translateY(1px); }
 
     .json-card { 
-      background: #060911; 
+      background: #06070a; 
       border: 1px solid rgba(255, 255, 255, 0.08); 
       border-radius: 1.25rem; 
       padding: 1.35rem; 
       font-family: 'JetBrains Mono', monospace; 
       font-size: 0.85rem; 
       overflow-x: auto; 
-      color: #6ee7b7; 
+      color: #fde68a; 
       box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.6); 
     }
     .json-header { display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.65rem; }
-    .tag-success { color: #34d399; font-weight: bold; }
+    .tag-success { color: #fbbf24; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -123,10 +121,10 @@
     <div class="header">
       <div class="badge">
         <span class="badge-dot"></span>
-        <span>VERSION 2.0 (LIVE CI/CD AUTO-DEPLOYED)</span>
+        <span>VERSION 3.0 (GOLDEN SUNSET - END-TO-END CI/CD VERIFIED)</span>
       </div>
       <h1>Homeserver Microservices Chain</h1>
-      <p class="subtitle">Real-time Service Communication: <code>Frontend ➔ Gateway (BE1) ➔ Core (BE2)</code></p>
+      <p class="subtitle">Live Service Mesh Execution: <code>Frontend ➔ Gateway (BE1) ➔ Core (BE2)</code></p>
     </div>
 
     <div class="chain-container">
@@ -135,8 +133,8 @@
           <span>🎨 Frontend (FE)</span>
           <span class="status-dot"></span>
         </div>
-        <div class="node-desc">Client Web App on Nginx Alpine. Features Cyberpunk Emerald Theme!</div>
-        <div class="node-meta">Port: 80 | v2.0 Emerald</div>
+        <div class="node-desc">Client Web App on Nginx Alpine. Features Golden Sunset Theme!</div>
+        <div class="node-meta">Port: 80 | v3.0 Sunset</div>
       </div>
 
       <div class="arrow">➔</div>
@@ -168,7 +166,7 @@
 
     <div class="json-card">
       <div class="json-header">
-        <span>PAYLOAD (FE ➔ BE1 ➔ BE2)</span>
+        <span>LIVE PAYLOAD (FE ➔ BE1 ➔ BE2)</span>
         <span id="latency-tag" class="tag-success">Latency: --</span>
       </div>
       <pre id="json-output">Polling live microservices payload...</pre>
@@ -189,7 +187,7 @@
         const data = await res.json();
         const duration = Date.now() - start;
         
-        latencyTag.innerText = `Total Roundtrip: ${duration}ms (v2.0)`;
+        latencyTag.innerText = `Total Roundtrip: ${duration}ms (v3.0)`;
         be1Meta.innerText = `Host: ${data.host} | Latency: ${data.totalLatency}`;
         if (data.be2Connection && data.be2Connection.response) {
           be2Meta.innerText = `Host: ${data.be2Connection.response.host} | Metric: ${data.be2Connection.response.data.randomMetric}`;
