@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Homeserver Microservices Demo v6.0 (GitOps Edition)</title>
+  <title>Homeserver Microservices Demo v7.0 (Ruby Crimson)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #070714;
-      --card-bg: #0f1026;
-      --card-border: #1e1f4b;
-      --primary: #a855f7;
-      --primary-light: #c084fc;
-      --accent: #38bdf8;
+      --bg: #0d0205;
+      --card-bg: #1c050c;
+      --card-border: #3d0e1c;
+      --primary: #f43f5e;
+      --primary-light: #fb7185;
+      --accent: #fda4af;
       --success: #10b981;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-dim: #c4b5fd;
+      --text: #fff1f2;
+      --text-muted: #fda4af;
+      --text-dim: #fecdd3;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
     body { 
-      background: radial-gradient(circle at top, #241442 0%, #070714 70%); 
+      background: radial-gradient(circle at top, #360714 0%, #0d0205 70%); 
       color: var(--text); 
       min-height: 100vh; 
       display: flex; 
@@ -35,17 +35,17 @@
       display: inline-flex; 
       align-items: center; 
       gap: 0.5rem; 
-      background: rgba(168, 85, 247, 0.2); 
-      color: #d8b4fe; 
+      background: rgba(244, 63, 94, 0.2); 
+      color: #fda4af; 
       padding: 0.45rem 1.25rem; 
       border-radius: 9999px; 
       font-size: 0.95rem; 
       font-weight: 800; 
       margin-bottom: 0.85rem; 
-      border: 1px solid rgba(192, 132, 252, 0.5); 
-      box-shadow: 0 0 25px rgba(168, 85, 247, 0.35); 
+      border: 1px solid rgba(251, 113, 133, 0.5); 
+      box-shadow: 0 0 25px rgba(244, 63, 94, 0.35); 
     }
-    .badge-dot { width: 10px; height: 10px; border-radius: 50%; background: #a855f7; box-shadow: 0 0 10px #a855f7; animation: blink 1.2s infinite; }
+    .badge-dot { width: 10px; height: 10px; border-radius: 50%; background: #f43f5e; box-shadow: 0 0 10px #f43f5e; animation: blink 1.2s infinite; }
     @keyframes blink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.85); } }
     
     h1 { 
@@ -53,7 +53,7 @@
       font-weight: 800; 
       letter-spacing: -0.03em; 
       margin-bottom: 0.5rem; 
-      background: linear-gradient(to right, #c084fc, #38bdf8, #ec4899); 
+      background: linear-gradient(to right, #fb7185, #f43f5e, #fbbf24); 
       -webkit-background-clip: text; 
       -webkit-text-fill-color: transparent; 
     }
@@ -73,20 +73,20 @@
       position: relative; 
       overflow: hidden; 
     }
-    .node-card:hover { transform: translateY(-3px); border-color: var(--primary-light); box-shadow: 0 20px 30px -5px rgba(168, 85, 247, 0.25); }
-    .node-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(to right, #a855f7, #38bdf8); }
+    .node-card:hover { transform: translateY(-3px); border-color: var(--primary-light); box-shadow: 0 20px 30px -5px rgba(244, 63, 94, 0.25); }
+    .node-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(to right, #f43f5e, #fb7185); }
 
-    .node-title { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; color: #f8fafc; }
+    .node-title { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; color: #fff1f2; }
     .status-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--success); display: inline-block; box-shadow: 0 0 10px var(--success); }
     .node-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.85rem; }
-    .node-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; background: rgba(0, 0, 0, 0.5); padding: 0.45rem 0.65rem; border-radius: 0.4rem; color: #e9d5ff; border: 1px solid rgba(192, 132, 252, 0.2); }
+    .node-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; background: rgba(0, 0, 0, 0.5); padding: 0.45rem 0.65rem; border-radius: 0.4rem; color: #fecdd3; border: 1px solid rgba(251, 113, 133, 0.2); }
 
-    .arrow { font-size: 1.6rem; color: #c084fc; animation: pulse 2s infinite; text-shadow: 0 0 12px rgba(192, 132, 252, 0.6); }
+    .arrow { font-size: 1.6rem; color: #fb7185; animation: pulse 2s infinite; text-shadow: 0 0 12px rgba(251, 113, 133, 0.6); }
     @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
 
     .controls { display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; }
     .btn { 
-      background: linear-gradient(135deg, #9333ea, #7c3aed); 
+      background: linear-gradient(135deg, #f43f5e, #e11d48); 
       color: #ffffff; 
       border: none; 
       padding: 0.85rem 1.75rem; 
@@ -95,24 +95,24 @@
       font-size: 1rem; 
       cursor: pointer; 
       transition: all 0.2s; 
-      box-shadow: 0 6px 20px 0 rgba(147, 51, 234, 0.4); 
+      box-shadow: 0 6px 20px 0 rgba(244, 63, 94, 0.4); 
     }
-    .btn:hover { background: linear-gradient(135deg, #a855f7, #9333ea); transform: translateY(-2px); box-shadow: 0 8px 25px 0 rgba(147, 51, 234, 0.6); }
+    .btn:hover { background: linear-gradient(135deg, #fb7185, #f43f5e); transform: translateY(-2px); box-shadow: 0 8px 25px 0 rgba(244, 63, 94, 0.6); }
     .btn:active { transform: translateY(1px); }
 
     .json-card { 
-      background: #03030a; 
+      background: #080103; 
       border: 1px solid var(--card-border); 
       border-radius: 1.25rem; 
       padding: 1.35rem; 
       font-family: 'JetBrains Mono', monospace; 
       font-size: 0.85rem; 
       overflow-x: auto; 
-      color: #d8b4fe; 
+      color: #fda4af; 
       box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.8); 
     }
-    .json-header { display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.85rem; border-bottom: 1px solid rgba(168, 85, 247, 0.2); padding-bottom: 0.65rem; }
-    .tag-success { color: #c084fc; font-weight: bold; }
+    .json-header { display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.85rem; border-bottom: 1px solid rgba(244, 63, 94, 0.2); padding-bottom: 0.65rem; }
+    .tag-success { color: #fb7185; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -120,7 +120,7 @@
     <div class="header">
       <div class="badge">
         <span class="badge-dot"></span>
-        <span>VERSION 6.0 (GITOPS AUTOMATION - 100% DECLARATIVE PIPELINE)</span>
+        <span>VERSION 7.0 (RUBY CRIMSON - SMART COMMIT SHA VERIFIED)</span>
       </div>
       <h1>Homeserver Microservices Chain</h1>
       <p class="subtitle">Live Service Mesh Execution: <code>Frontend (FE) ➔ Gateway (BE1) ➔ Core Service (BE2)</code></p>
@@ -132,8 +132,8 @@
           <span>🎨 Frontend (FE)</span>
           <span class="status-dot"></span>
         </div>
-        <div class="node-desc">Client Web App on Nginx Alpine. Features Electric Cyberpunk Violet Theme!</div>
-        <div class="node-meta">Port: 80 | v6.0 GitOps</div>
+        <div class="node-desc">Client Web App on Nginx Alpine. Features Ruby Crimson & Amber Theme!</div>
+        <div class="node-meta">Port: 80 | v7.0 Crimson</div>
       </div>
 
       <div class="arrow">➔</div>
@@ -143,7 +143,7 @@
           <span>🚀 Gateway (BE1)</span>
           <span class="status-dot"></span>
         </div>
-        <div class="node-desc">Express API Gateway. Enriches client requests & dispatches to BE2.</div>
+        <div class="node-desc">Express API Gateway with Smart Commit SHA Injection & Verification.</div>
         <div class="node-meta" id="be1-meta">Status: Ready</div>
       </div>
 
@@ -186,8 +186,8 @@
         const data = await res.json();
         const duration = Date.now() - start;
         
-        latencyTag.innerText = `Total Roundtrip: ${duration}ms (v6.0 GitOps)`;
-        be1Meta.innerText = `Host: ${data.host} | Latency: ${data.totalLatency}`;
+        latencyTag.innerText = `Total Roundtrip: ${duration}ms (v7.0 Crimson)`;
+        be1Meta.innerText = `Commit: ${data.commitSha ? data.commitSha.substring(0,7) : 'dev'} | Latency: ${data.totalLatency}`;
         if (data.be2Connection && data.be2Connection.response) {
           be2Meta.innerText = `Host: ${data.be2Connection.response.host} | Metric: ${data.be2Connection.response.data.randomMetric}`;
         }

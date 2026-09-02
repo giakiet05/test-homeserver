@@ -5,6 +5,8 @@ const os = require('os');
 const app = express();
 const PORT = process.env.PORT || 4001;
 const BE2_URL = process.env.BE2_URL || 'http://be2:4002';
+const COMMIT_SHA = process.env.COMMIT_SHA || 'unknown';
+const APP_VERSION = process.env.APP_VERSION || '6.0.0';
 
 app.use(cors());
 app.use(express.json());
@@ -29,6 +31,8 @@ app.get('/api/status', async (req, res) => {
 
   res.json({
     service: 'Backend 1 (Gateway / Aggregator)',
+    version: APP_VERSION,
+    commitSha: COMMIT_SHA,
     status: 'healthy',
     timestamp: new Date().toISOString(),
     host: os.hostname(),
@@ -43,8 +47,8 @@ app.get('/api/status', async (req, res) => {
   });
 });
 
-app.get('/health', (req, res) => res.json({ status: 'ok', service: 'be1' }));
+app.get('/health', (req, res) => res.json({ status: 'ok', service: 'be1', commitSha: COMMIT_SHA }));
 
 app.listen(PORT, () => {
-  console.log(`[BE1] Gateway is running on port ${PORT}, forwarding to ${BE2_URL}`);
+  console.log(`[BE1] Gateway v${APP_VERSION} (${COMMIT_SHA}) is running on port ${PORT}`);
 });

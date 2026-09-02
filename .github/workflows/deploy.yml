@@ -6,7 +6,7 @@ on:
 
 jobs:
   build-and-deploy:
-    name: Build, Deploy & Verify Live Health
+    name: Build, Deploy & Verify Exact Commit
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,12 +36,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # 2. Build & Push BE1 (Gateway)
+      # 2. Build & Push BE1 (Gateway) with COMMIT_SHA
       - name: Build and push BE1 Image
         uses: docker/build-push-action@v5
         with:
           context: ./be1
           push: true
+          build-args: |
+            COMMIT_SHA=${{ github.sha }}
+            APP_VERSION=6.0.0
           tags: ghcr.io/${{ github.repository_owner }}/test-homeserver-be1:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -65,27 +68,37 @@ jobs:
                -H "Content-Type: application/json")
           echo "Coolify Response: $RESPONSE"
 
-      # 5. Polling & Verifying Live Health Status
-      - name: Polling & Verifying Live Deployment
+      # 5. Smart Polling: Verify Exact Commit SHA on Live Server
+      - name: Polling & Verifying Exact Commit SHA
         run: |
-          echo "⏳ Waiting for Homeserver to pull images & launch healthy containers..."
-          sleep 5
-          MAX_RETRIES=15
-          RETRY_COUNT=0
+          EXPECTED_SHA="${{ github.sha }}"
           TARGET_URL="https://test.giakiet.io.vn/api/status"
+          MAX_RETRIES=20
+          RETRY_COUNT=0
+
+          echo "🎯 Expected Commit SHA on Live Server: $EXPECTED_SHA"
+          echo "⏳ Waiting for Coolify to pull images & complete Zero-Downtime switch..."
 
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            HTTP_STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" "$TARGET_URL" || echo "000")
-            if [ "$HTTP_STATUS" -eq 200 ]; then
-              echo "✅ Live endpoint responded with HTTP 200 OK!"
-              echo "Payload:"
-              curl -k -s "$TARGET_URL"
+            # Fetch live JSON response
+            RESPONSE=$(curl -k -s "$TARGET_URL" || echo "{}")
+            LIVE_SHA=$(echo "$RESPONSE" | grep -o '"commitSha":"[^"]*' | cut -d'"' -f4 || echo "unknown")
+
+            echo "[$((RETRY_COUNT+1))/$MAX_RETRIES] Live Server Commit SHA: '$LIVE_SHA'"
+
+            if [ "$LIVE_SHA" = "$EXPECTED_SHA" ]; then
+              echo "=================================================="
+              echo "🎉 SUCCESS! New version with exact commit SHA is LIVE!"
+              echo "=================================================="
+              echo "Full Payload:"
+              echo "$RESPONSE"
               exit 0
             fi
-            echo "Attempt $((RETRY_COUNT+1))/$MAX_RETRIES: Status $HTTP_STATUS. Waiting 5s for containers to settle..."
+
+            echo "Server is still running previous container. Retrying in 5s..."
             sleep 5
             RETRY_COUNT=$((RETRY_COUNT+1))
           done
 
-          echo "❌ Live health check failed after $MAX_RETRIES attempts."
+          echo "❌ Timed out waiting for commit $EXPECTED_SHA to go live."
           exit 1
